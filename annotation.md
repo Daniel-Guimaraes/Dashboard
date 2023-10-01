@@ -1661,6 +1661,231 @@ export function Root(props: RootProps) {
 export const useFileInput = () => useContext(FileInputContext)
 ```
 
+# Criando Select de País
+
+Vou agora criar o select de país, para que o usuário possa definir qual o país que ele mora. Eu vou criar esse select com o radix, então eu preciso instalar com o seguinte comando `npm i @radix-ui/react-select`.
+
+Feito isso eu começo a criação. Primeiro eu vou criar um arquivo chamado `Select.tsx` no meu componente `Form`. Agora nesse arquivo eu vou criar toda a estrutura do meu select com radix:
+
+```js
+'use client'
+
+import * as SelectPrimitive from '@radix-ui/react-select'
+import { Check, ChevronDownIcon } from 'lucide-react'
+
+export function Select() {
+  return (
+    <SelectPrimitive.Root>
+      <SelectPrimitive.Trigger className="flex h-11 w-full items-center justify-between gap-2 rounded-lg border border-zinc-300 px-3 py-2 shadow-sm data-[placeholder]:text-zinc-600">
+        <SelectPrimitive.Value
+          placeholder="Select a country..."
+          className="text-black"
+        />
+
+        <SelectPrimitive.Icon>
+          <ChevronDownIcon className="h-5 w-5 text-zinc-500" />
+        </SelectPrimitive.Icon>
+      </SelectPrimitive.Trigger>
+
+      <SelectPrimitive.Portal>
+        <SelectPrimitive.Content
+          side="bottom"
+          position="popper"
+          sideOffset={8}
+          className="z-10 w-[--radix-select-trigger-width] overflow-hidden rounded-lg border border-zinc-200 bg-white"
+        >
+          <SelectPrimitive.Viewport>
+            <SelectPrimitive.Item
+              value="br"
+              className="flex cursor-pointer items-center justify-between gap-2 px-3 py-2.5 outline-none data-[highlighted]:bg-zinc-50"
+            >
+              <SelectPrimitive.ItemText className="text-black">
+                Brazil
+              </SelectPrimitive.ItemText>
+
+              <SelectPrimitive.ItemIndicator>
+                <Check className="h-4 w-4 text-violet-500" />
+              </SelectPrimitive.ItemIndicator>
+            </SelectPrimitive.Item>
+
+            <SelectPrimitive.Item
+              value="us"
+              className="flex cursor-pointer items-center justify-between gap-2 px-3 py-2.5 outline-none data-[highlighted]:bg-zinc-50"
+            >
+              <SelectPrimitive.ItemText className="text-black">
+                United State
+              </SelectPrimitive.ItemText>
+
+              <SelectPrimitive.ItemIndicator>
+                <Check className="h-4 w-4 text-violet-500" />
+              </SelectPrimitive.ItemIndicator>
+            </SelectPrimitive.Item>
+
+            <SelectPrimitive.Item
+              value="uk"
+              className="flex cursor-pointer items-center justify-between gap-2 px-3 py-2.5 outline-none data-[highlighted]:bg-zinc-50"
+            >
+              <SelectPrimitive.ItemText className="text-black">
+                England
+              </SelectPrimitive.ItemText>
+
+              <SelectPrimitive.ItemIndicator>
+                <Check className="h-4 w-4 text-violet-500" />
+              </SelectPrimitive.ItemIndicator>
+            </SelectPrimitive.Item>
+
+            <SelectPrimitive.Item
+              value="rus"
+              className="flex cursor-pointer items-center justify-between gap-2 px-3 py-2.5 outline-none data-[highlighted]:bg-zinc-50"
+            >
+              <SelectPrimitive.ItemText className="text-black">
+                Russia
+              </SelectPrimitive.ItemText>
+
+              <SelectPrimitive.ItemIndicator>
+                <Check className="h-4 w-4 text-violet-500" />
+              </SelectPrimitive.ItemIndicator>
+            </SelectPrimitive.Item>
+          </SelectPrimitive.Viewport>
+        </SelectPrimitive.Content>
+      </SelectPrimitive.Portal>
+    </SelectPrimitive.Root>
+  )
+}
+```
+
+Agora eu chamo o select lá no meu arquivo `page.tsx`: 
+
+```js
+<div className="grid grid-cols-form gap-3 pt-5">
+  <label
+    htmlFor="country"
+    className="text-sm font-medium text-zinc-700"
+  >
+    Country
+  </label>
+
+  <Select />
+</div>
+```
+
+# Componentizando select
+
+Vou agora componentizar meu `select` para que eu tenha boas práticas na escrita do código.
+
+Então eu vou transformar meu `select` em uma pasta, e vou criar dois arquivos `index.tsx e SelectItem.tsx`, no meu index vai continuar a minha estrutura, agora no meu selectItem eu vou desaclopar os códigos de adicionar um item no select:
+
+```js
+'use client'
+
+import * as Select from '@radix-ui/react-select'
+import { Check } from 'lucide-react'
+
+export type SelectItemProps = Select.SelectItemProps & {
+  text: string
+}
+
+export function SelectItem({ text, ...props }: SelectItemProps) {
+  return (
+    <Select.Item
+      className="flex cursor-pointer items-center justify-between gap-2 px-3 py-2.5 outline-none data-[highlighted]:bg-zinc-50"
+      {...props}
+    >
+      <Select.ItemText className="text-black">{text}</Select.ItemText>
+
+      <Select.ItemIndicator>
+        <Check className="h-4 w-4 text-violet-500" />
+      </Select.ItemIndicator>
+    </Select.Item>
+  )
+}
+```
+
+Agora a minha estrutura no arquivo `index` vai ficar da seguinte forma:
+
+```js
+'use client'
+
+import * as SelectPrimitive from '@radix-ui/react-select'
+import { ChevronDownIcon } from 'lucide-react'
+import { ReactNode } from 'react'
+
+export interface SelectProps {
+  children: ReactNode
+  placeholder: string
+}
+
+export function Select({ children, placeholder }: SelectProps) {
+  return (
+    <SelectPrimitive.Root>
+      <SelectPrimitive.Trigger className="flex h-11 w-full items-center justify-between gap-2 rounded-lg border border-zinc-300 px-3 py-2 shadow-sm data-[placeholder]:text-zinc-600">
+        <SelectPrimitive.Value
+          placeholder={placeholder}
+          className="text-black"
+        />
+
+        <SelectPrimitive.Icon>
+          <ChevronDownIcon className="h-5 w-5 text-zinc-500" />
+        </SelectPrimitive.Icon>
+      </SelectPrimitive.Trigger>
+
+      <SelectPrimitive.Portal>
+        <SelectPrimitive.Content
+          side="bottom"
+          position="popper"
+          sideOffset={8}
+          className="z-10 w-[--radix-select-trigger-width] overflow-hidden rounded-lg border border-zinc-200 bg-white"
+        >
+          <SelectPrimitive.Viewport>{children}</SelectPrimitive.Viewport>
+        </SelectPrimitive.Content>
+      </SelectPrimitive.Portal>
+    </SelectPrimitive.Root>
+  )
+}
+```
+
+E agora no meu arquivo `page.tsx` eu vou utilizar meu componente:
+
+```js
+<div className="grid grid-cols-form gap-3 pt-5">
+    <label
+      htmlFor="country"
+      className="text-sm font-medium text-zinc-700"
+    >
+      Country
+    </label>
+
+    <Select placeholder="Select a country">
+      <SelectItem value="br" text="Brazil" />
+      <SelectItem value="us" text="United State" />
+      <SelectItem value="rus" text="Russia" />
+    </Select>
+  </div>
+
+  <div className="grid grid-cols-form gap-3 pt-5">
+    <label
+      htmlFor="timezone"
+      className="text-sm font-medium text-zinc-700"
+    >
+      TimeZone
+    </label>
+
+    <Select placeholder="Select a timezone">
+      <SelectItem value="utc8" text="São Paulo (GMT-03:00)" />
+      <SelectItem value="utc3" text="Cuiabá (GMT-04:00)" />
+      <SelectItem value="utc4" text="Manaus (GMT-04:00)" />
+    </Select>
+  </div>
+```
+
+
+
+
+
+
+
+
+
 
 
 
