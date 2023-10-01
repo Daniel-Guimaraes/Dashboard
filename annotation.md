@@ -1349,6 +1349,52 @@ Agora vou criar a seção de upload do avatar, que permite o usuário selecionar
 </div>
 ```
 
+# Context e Preview da imagem
+
+Agora o que vou fazer vai ser criar um array que vai armazenar os arquivos do meu usuário, eu vou criar esse array no meu arquivo `Root.tsx` do meu componente `FileInput`.
+
+```js
+'use client'
+
+import {
+  ComponentProps,
+  createContext,
+  useContext,
+  useId,
+  useState,
+} from 'react'
+
+export type RootProps = ComponentProps<'div'>
+
+type FileInputContextType = {
+  id: string
+  files: File[]
+  onFilesSelected: (files: File[]) => void
+}
+
+const FileInputContext = createContext({} as FileInputContextType)
+
+export function Root(props: RootProps) {
+  const id = useId()
+  const [files, setFiles] = useState<File[]>([])
+
+  return (
+    <FileInputContext.Provider value={{ id, files, onFilesSelected: setFiles }}>
+      <div {...props} />
+    </FileInputContext.Provider>
+  )
+}
+
+export const useFileInput = () => useContext(FileInputContext)
+```
+
+Agora meus inputs tem acesso a essas informações. E agora no meu arquivo `Control.tsx`, eu vou criar uma função e vou passar ela para meu input, essa função vai receber um evento, na onde eu vou capturar o arquivo que vem desse evento e armazenar ele em uma constante:
+
+
+```js
+
+
+```
 
 
 
