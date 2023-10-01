@@ -1388,13 +1388,283 @@ export function Root(props: RootProps) {
 export const useFileInput = () => useContext(FileInputContext)
 ```
 
-Agora meus inputs tem acesso a essas informações. E agora no meu arquivo `Control.tsx`, eu vou criar uma função e vou passar ela para meu input, essa função vai receber um evento, na onde eu vou capturar o arquivo que vem desse evento e armazenar ele em uma constante:
+Agora meus inputs tem acesso a essas informações. E agora no meu arquivo `Control.tsx`, eu vou criar uma função e vou passar ela para meu input, essa função vai receber um evento, na onde eu vou capturar o arquivo que vem desse evento e armazenar ele em uma constante, e essa constante eu passo para a minha função que está atualizando meu estado:
 
 
 ```js
+'use client'
 
+import { ChangeEvent, ComponentProps } from 'react'
+import { useFileInput } from './Root'
 
+export type ControlProps = ComponentProps<'input'>
+
+export function Control(props: ControlProps) {
+  const { id, onFilesSelected } = useFileInput()
+
+  function handleFilesSelected(event: ChangeEvent<HTMLInputElement>) {
+    if (!event.target.files?.length) {
+      return
+    }
+
+    const files = Array.from(event.target.files)
+
+    onFilesSelected(files)
+  }
+
+  return (
+    <input
+      type="file"
+      className="sr-only"
+      id={id}
+      onChange={handleFilesSelected}
+      {...props}
+    />
+  )
+}
 ```
+
+Agora no meu arquivo `ImagePreview.tsx` eu vou ter acesso a essa imagem, e vou exibi-la em tela. Para isto eu vou usar o `useMemo()` do react, que nada mais é do que uma função que vai memorizar cálculos pesados para o navegador. Então o que vou fazer vai ser, transformar meu arquivo em uma URL e exibir em tela.
+
+```js
+'use client'
+
+import { User } from 'lucide-react'
+import { useFileInput } from './Root'
+import { useMemo } from 'react'
+
+export function ImagePreview() {
+  const { files } = useFileInput()
+
+  const previewURL = useMemo(() => {
+    if (files.length === 0) {
+      return null
+    }
+
+    return URL.createObjectURL(files[0])
+  }, [files])
+
+  if (previewURL === null) {
+    return (
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-violet-50">
+        <User className="h-8 w-8 text-violet-500" />
+      </div>
+    )
+  } else {
+    return (
+      <img src={previewURL} className="h-16 w-16 rounded-full object-cover" />
+    )
+  }
+}
+```
+
+# Listagem de arquivos
+
+O que vou fazer agora vai ser criar uma lista dos uploads do usuário, então pra isso eu vou criar uma novo arquivo chamado `FileList.tsx`, dentro do meu componente `FileInput`. E nesse arquivo eu vou criar a estrutura:
+
+```js
+'use client'
+
+import { Trash2, UploadCloud } from 'lucide-react'
+import { useFileInput } from './Root'
+
+export function FileList() {
+  const { files } = useFileInput()
+
+  return (
+    <div className="mt-4 space-y-3">
+      {files.map((file) => {
+        return (
+          <div
+            key={file.name}
+            className="group flex items-start gap-4 rounded-lg border border-zinc-200 p-4"
+          >
+            <div className="rounded-full border-4 border-violet-100 bg-violet-200 p-2 text-violet-600">
+              <UploadCloud className="h-4 w-4" />
+            </div>
+
+            <div className="flex flex-1 flex-col items-start gap-1">
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-zinc-700">
+                  {file.name}
+                </span>
+                <span className="text-sm text-zinc-500">{file.size}</span>
+              </div>
+
+              <div className="flex w-full items-center gap-3">
+                <div className="h-2 flex-1 rounded-full bg-zinc-100">
+                  <div className="h-2 w-4/5 rounded-full bg-violet-600" />
+                </div>
+                <span className="text-sm font-medium text-zinc-700">80%</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="ml-auto rounded-md p-2 hover:bg-zinc-50"
+            >
+              <Trash2 className="h-5 w-5 text-zinc-500" />
+            </button>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+```
+
+No meu arquivo `index.tsx` eu vou importar meu componente e vou compartilhar ele: 
+
+```js
+import { Root } from './Root'
+import { Control } from './Control'
+import { ImagePreview } from './ImagePreview'
+import { Trigger } from './Trigger'
+import { FileList } from './FileList'
+
+export { Root, Control, ImagePreview, Trigger, FileList }
+```
+
+Agora para visualizar preciso chamar meu componente no meu arquivo `page.tsx`:
+
+```js
+<div className="grid grid-cols-form gap-3 pt-5">
+  <label
+    htmlFor="projects"
+    className="text-sm font-medium text-zinc-700"
+  >
+    Portfolio Projects
+    <span className="mt-0.5 block text-sm font-normal text-zinc-500">
+      Share a few snippets of your work
+    </span>
+  </label>
+
+  <FileInput.Root>
+    <FileInput.Trigger />
+    <FileInput.FileList />
+    <FileInput.Control multiple />
+  </FileInput.Root>
+</div>
+```
+
+O que posso perceber é que o tamanho do meu arquivo está vindo em bytes, então o que eu preciso fazer é converter o bytes em giga, para isso eu vou criar uma pasta chamada `Utils` e dentro dela um arquivo chamado `format-bytes.ts`, e nesse arquivo eu vou ter a estrutura de formatação:
+
+
+```js
+export function formatBytes(bytes: number) {
+  const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+
+  let value = bytes
+  let unitIndex = 0
+
+  while (value >= 1024 && unitIndex < units.length - 1) {
+    value /= 1024
+    unitIndex++
+  }
+
+  return `${value.toFixed(1)}${units[unitIndex]}`
+}
+```
+
+Agora eu vou e uso essa função para formatar o tamanho do meu arquivo :
+
+```js
+<div className="flex flex-col">
+  <span className="text-sm font-medium text-zinc-700">
+    {file.name}
+  </span>
+  <span className="text-sm text-zinc-500">
+    {formatBytes(file.size)}
+  </span>
+</div>
+```
+
+Agora tenho outro problema, ao invés de criar uma lista, o arquivo está sobrescrevendo um ao outro. para mudar isso, eu vou pegar a propriedade que estou recebendo do meu input chamada `multiple`, essa propriedade eu vou falar que por padrão ela vai começar como falsa, então no momento que meu input verificar que o usuário, selecionou múltiplos arquivos ele vai mudar a propriedade para `true`, e essa propriedade eu vou passar para a minha função `onFilesSelected` que estou compartilhando no meu contexto.
+
+```js
+'use client'
+
+import { ChangeEvent, ComponentProps } from 'react'
+import { useFileInput } from './Root'
+
+export type ControlProps = ComponentProps<'input'>
+
+export function Control({ multiple = false, ...props }: ControlProps) {
+  const { id, onFilesSelected } = useFileInput()
+
+  function handleFilesSelected(event: ChangeEvent<HTMLInputElement>) {
+    if (!event.target.files?.length) {
+      return
+    }
+
+    const files = Array.from(event.target.files)
+
+    onFilesSelected(files, multiple)
+  }
+
+  return (
+    <input
+      type="file"
+      className="sr-only"
+      id={id}
+      onChange={handleFilesSelected}
+      multiple={multiple}
+      {...props}
+    />
+  )
+}
+```
+
+Agora lá no meu contexto, eu vou ter que alterar a minha função para que ela receba também o `multiple` e vou criar uma função que vai verificar pra mim se tem ou não múltiplos arquivos, e se tiver tomar uma outra ação. 
+
+```js
+
+'use client'
+
+import {
+  ComponentProps,
+  createContext,
+  useContext,
+  useId,
+  useState,
+} from 'react'
+
+export type RootProps = ComponentProps<'div'>
+
+type FileInputContextType = {
+  id: string
+  files: File[]
+  onFilesSelected: (files: File[], multiple: boolean) => void
+}
+
+const FileInputContext = createContext({} as FileInputContextType)
+
+export function Root(props: RootProps) {
+  const id = useId()
+  const [files, setFiles] = useState<File[]>([])
+
+  function onFilesSelected(files: File[], multiple: boolean) {
+    if (multiple) {
+      setFiles((state) => [...state, ...files])
+    } else {
+      setFiles(files)
+    }
+  }
+
+  return (
+    <FileInputContext.Provider value={{ id, files, onFilesSelected }}>
+      <div {...props} />
+    </FileInputContext.Provider>
+  )
+}
+
+export const useFileInput = () => useContext(FileInputContext)
+```
+
+
+
+
+
 
 
 
