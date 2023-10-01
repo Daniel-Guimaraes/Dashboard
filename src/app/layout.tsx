@@ -1,24 +1,16 @@
+import './globals.css'
+
+import { ReactNode } from 'react'
+import { Inter } from 'next/font/google'
 import { Sidebar } from '@/components/Sidebar'
 
-import './globals.css'
-import type { Metadata } from 'next'
+const inter = Inter({ subsets: ['latin'] })
 
-import { Inter } from 'next/font/google'
-
-const inter = Inter({
-  subsets: ['latin'],
-})
-
-export const metadata: Metadata = {
-  title: 'Dashboard',
-  description: 'Dashboard criada com Tailwind css e NextJs',
+export const metadata = {
+  title: 'Untitled UI',
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="antialiased">
       <body className={inter.className}>
