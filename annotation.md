@@ -1878,6 +1878,91 @@ E agora no meu arquivo `page.tsx` eu vou utilizar meu componente:
   </div>
 ```
 
+# Input de Biografia
+
+Vou trabalhar agora na construção do meu input de biografia, aonde o usuário vai poder deixar sua biografia por escrita para adicionar no seu perfil.
+
+```js
+<div className="grid grid-cols-form gap-3 pt-5">
+  <label htmlFor="bio" className="text-sm font-medium text-zinc-700">
+    Bio
+    <span className="mt-0.5 block text-sm font-normal text-zinc-500">
+      Write a short introduction
+    </span>
+  </label>
+
+  <div className="space-y-3">
+    <div className="grid grid-cols-2 gap-3">
+      <Select defaultValue="normal">
+        <SelectItem value="normal" defaultChecked text="Normal text" />
+        <SelectItem value="md" text="Markdown" />
+      </Select>
+
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          className="rounded-md p-2 hover:bg-zinc-50"
+        >
+          <Bold className="h-4 w-4 text-zinc-500" strokeWidth={3} />
+        </button>
+        <button
+          type="button"
+          className="rounded-md p-2 hover:bg-zinc-50"
+        >
+          <Italic className="h-4 w-4 text-zinc-500" strokeWidth={3} />
+        </button>
+        <button
+          type="button"
+          className="rounded-md p-2 hover:bg-zinc-50"
+        >
+          <Link className="h-4 w-4 text-zinc-500" strokeWidth={3} />
+        </button>
+        <button
+          type="button"
+          className="rounded-md p-2 hover:bg-zinc-50"
+        >
+          <List className="h-4 w-4 text-zinc-500" strokeWidth={3} />
+        </button>
+        <button
+          type="button"
+          className="rounded-md p-2 hover:bg-zinc-50"
+        >
+          <ListOrdered
+            className="h-4 w-4 text-zinc-500"
+            strokeWidth={3}
+          />
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+Agora vou criar um novo componente para minha **textarea**:
+
+```js
+import { ComponentProps } from 'react'
+
+export type TextareaProps = ComponentProps<'textarea'>
+
+export function Textarea(props: TextareaProps) {
+  return (
+    <textarea
+      className="min-h-[120px] w-full resize-y rounded-lg border border-zinc-300 px-3 py-2 shadow-sm"
+      {...props}
+    />
+  )
+}
+```
+
+E pronto, agora é só chamar o componente passando um `id` e `defaultValue`, para que fique com um texto padrão. 
+
+```js
+<Textarea
+              id="bio"
+              defaultValue="I'm a Product Designer based in Melbourne, Australia. I specialise in UX/UI design, brand strategy, and Webflow development."
+            />
+```
 
 
 
