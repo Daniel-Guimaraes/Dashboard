@@ -1,7 +1,7 @@
 'use client'
 
-import * as Select from '@radix-ui/react-select'
 import { Check } from 'lucide-react'
+import * as Select from '@radix-ui/react-select'
 
 export type SelectItemProps = Select.SelectItemProps & {
   text: string

@@ -1,8 +1,8 @@
 'use client'
-
-import * as SelectPrimitive from '@radix-ui/react-select'
-import { ChevronDownIcon } from 'lucide-react'
 import { ReactNode } from 'react'
+
+import { ChevronDownIcon } from 'lucide-react'
+import * as SelectPrimitive from '@radix-ui/react-select'
 
 export interface SelectProps extends SelectPrimitive.SelectProps {
   children: ReactNode

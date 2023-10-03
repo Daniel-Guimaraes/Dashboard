@@ -1,10 +1,11 @@
-import { SettingsTabs } from '@/components/SettingsTabs'
-import * as Input from '@/components/Input'
 import { Bold, Italic, Link, List, ListOrdered, Mail } from 'lucide-react'
-import * as FileInput from '@/components/Form/FileInput'
-import { Select } from '@/components/Form/Select'
+
 import { SelectItem } from '@/components/Form/Select/SelectItem'
+import { SettingsTabs } from '@/components/SettingsTabs'
+import * as FileInput from '@/components/Form/FileInput'
 import { Textarea } from '@/components/Form/Textarea'
+import { Select } from '@/components/Form/Select'
+import * as Input from '@/components/Input'
 
 export default function Home() {
   return (
