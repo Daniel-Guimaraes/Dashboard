@@ -39,8 +39,8 @@ module.exports = {
 
       keyframes: {
         slideDownAndFade: {
-          from: { opacity: 0, transform: 'translateY(-2px)' },
-          to: { opacity: 1, transform: 'translateY(0)' },
+          from: { transform: 'translateY(-50px)' },
+          to: { transform: 'translateY(0)' },
         },
       },
 
