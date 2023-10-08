@@ -2091,6 +2091,246 @@ Agora no meu componente de select, eu adiciono a animação via tailwind:
 </SelectPrimitive.Portal>
 ```
 
+# Variantes de botões
+
+Existem no nosso projeto, alguns elementos que possuem uma estilização um pouco diferente, mas da para perceber que a função de ambos é a mesma. Como por exemplo os botões da nossa aplicação, que por mais que tenha uma estilização diferente, eles não passam de elementos com a função de um botão. Por isso quando temos um elemento que possui diversas estilizações diferentes, é uma boa prática, trabalharmos com **variantes**. 
+
+E para trabalharmos com variantes, temos atualmente a **Tailwind Variants**, e para instalar eu uso os seguintes comandos:
+
+```bash
+npm i tailwind-variants
+```
+
+Vou então começar criando o nosso primeiro componente que vai ser o **components/Button.tsx**. E para esse componente eu vou passar uma estrutura padrão:
+
+```js
+import { ComponentProps } from 'react'
+
+export type ButtonProps = ComponentProps<'button'>
+
+export function Button(props: ButtonProps) {
+  return (
+    <button
+      {...props}
+      className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-violet-700"
+    />
+  )
+}
+```
+
+Só que como eu vou ter botões com estilizações diferentes, eu vou começar a trabalhar com variante, e para isso eu vou importar o tailwind variants e aplicar uma estilização base que todo componente vai ter
+
+```js
+import { ComponentProps } from 'react'
+import { tv } from 'tailwind-variants'
+
+const button = tv({
+  base: [
+    'rounded-lg px-4 py-2 text-sm font-semibold outline-none shadow-sm',
+    'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-violet-500',
+    'active:opacity-80',
+  ],
+})
+
+export type ButtonProps = ComponentProps<'button'>
+
+export function Button(props: ButtonProps) {
+  return <button {...props} className={button()} />
+}
+```
+
+E pronto, a estrutura base do nosso botão já está feita, agora eu vou começar a criar as **variants** do nosso botão, que vão ser as estilizações que vão variar no nosso elemento. 
+
+```js
+import { ComponentProps } from 'react'
+import { tv, VariantProps } from 'tailwind-variants'
+
+const button = tv({
+  base: [
+    'rounded-lg px-4 py-2 text-sm font-semibold outline-none shadow-sm',
+    'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-violet-500',
+    'active:opacity-80',
+  ],
+
+  variants: {
+    variant: {
+      primary: 'bg-violet-600 text-white hover:bg-violet-700',
+      outline: 'border border-zinc-300 text-zinc-700 hover:bg-zinc-50',
+    },
+  },
+
+  defaultVariants: {
+    variant: 'primary',
+  },
+})
+
+export type ButtonProps = ComponentProps<'button'> & VariantProps<typeof button>
+
+export function Button({ variant, ...props }: ButtonProps) {
+  return <button {...props} className={button({ variant })} />
+}
+```
+
+Então eu criei qual vai ser a variante primária, e passei ela como sendo o valor padrão, para caso eu não passe nenhuma variante para meu botão, e criei uma outra variação do meu botão. 
+
+E agora é só eu importar ele onde eu quiser usa-lo, passar as propriedades padrão e definir qual vai ser a sua variante de estilização. 
+
+```js
+<div className="mt-6 flex flex-col border-b border-zinc-200 pb-4">
+  <div className="flex items-center justify-between">
+    <div className="space-y-1">
+      <h2 className="text-lg font-medium text-zinc-900">Personal Info</h2>
+      <span className="text-sm text-zinc-500">
+        Update your photo and personal details here
+      </span>
+    </div>
+    <div className="flex items-center gap-2">
+      <Button variant="outline" type="button">
+        Cancel
+      </Button>
+      <Button type="submit" form="settings">
+        Save
+      </Button>
+    </div>
+  </div>
+</div>
+```
+
+# Variante ghost de botão
+
+Vou criar agora a variação dos botões menores:
+
+```js
+variants: {
+    variant: {
+      primary: 'bg-violet-600 text-white hover:bg-violet-700',
+      ghost: 'rounded-md px-2 hover:bg-zinc-50 shadow-none',
+      outline: 'border border-zinc-300 text-zinc-700 hover:bg-zinc-50',
+    },
+  },
+```
+
+E agora só eu fazer as trocas na minha aplicação
+
+
+# Criando componente `FileItem`
+
+No momento tenho apenas uma variação do meu FileItem acontecendo, sendo que no layout ainda tem mais duas variações diferentes, por isso vou criar as duas agoras.
+
+Primeiro vou criar um arquivo dentro da minha pasta `FileInput`, chamado de `FileItem`. Nesse arquivo eu vou mover a parte do código responsável pelo nosso item, no arquivo `FileList` e vou fazer algumas mudanças. 
+
+```js
+import { Button } from '@/components/Button'
+import { formatBytes } from '@/utils/format-bytes'
+import { UploadCloud, Trash2, CheckCircle2 } from 'lucide-react'
+
+export interface FileItemProps {
+  name: string
+  size: number
+}
+
+export function FileItem({ name, size }: FileItemProps) {
+  const state = 'error' as 'progress' | 'error' | 'complete'
+
+  return (
+    <div className="group flex items-start gap-4 rounded-lg border border-zinc-200 p-4">
+      <div className="rounded-full border-4 border-violet-100 bg-violet-200 p-2 text-violet-600">
+        <UploadCloud className="h-4 w-4" />
+      </div>
+
+      {state === 'error' ? (
+        <div className="flex flex-1 flex-col items-start gap-1">
+          <div className="flex flex-col">
+            <span className="text-error-700 text-sm font-medium">
+              Upload failed, please try again
+            </span>
+            <span className="text-error-600 text-sm">{name}</span>
+          </div>
+
+          <button
+            type="button"
+            className="text-error-700 hover:text-error-900 text-sm font-semibold"
+          >
+            Try again
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-1 flex-col items-start gap-1">
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-zinc-700">{name}</span>
+            <span className="text-sm text-zinc-500">{formatBytes(size)}</span>
+          </div>
+
+          <div className="flex w-full items-center gap-3">
+            <div className="h-2 flex-1 rounded-full bg-zinc-100">
+              <div
+                className="h-2 rounded-full bg-violet-600"
+                style={{
+                  width: state === 'complete' ? '100%' : '80%',
+                }}
+              />
+            </div>
+            <span className="text-sm font-medium text-zinc-700">
+              {state === 'complete' ? '100%' : '80%'}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {state === 'complete' ? (
+        <CheckCircle2 className="h-5 w-5 fill-violet-600 text-white" />
+      ) : (
+        <Button type="button" variant="ghost">
+          <Trash2 className="h-5 w-5 text-zinc-500" />
+        </Button>
+      )}
+    </div>
+  )
+}
+```
+
+Agora no meu arquivo `tailwind.config.ts` eu vou criar a minha paleta de cores de erro: 
+
+```js
+error: {
+  25: '#FFFBFA',
+  50: '#FEF3F2',
+  100: '#FEE4E2',
+  200: '#FECDCA',
+  300: '#FDA29B',
+  400: '#F97066',
+  500: '#F04438',
+  600: '#D92D20',
+  700: '#B42318',
+  800: '#912018',
+  900: '#7A271A',
+},
+```
+E no meu arquivo `FileList.tsx` eu vou importar meu componente:
+
+```js
+'use client'
+import { useAutoAnimate } from '@formkit/auto-animate/react'
+
+import { useFileInput } from './Root'
+import { FileItem } from './FileItem'
+
+export function FileList() {
+  const { files } = useFileInput()
+  const [parent] = useAutoAnimate()
+
+  return (
+    <div ref={parent} className="mt-4 space-y-3">
+      {files.map((file) => {
+        return <FileItem key={file.name} name={file.name} size={file.size} />
+      })}
+    </div>
+  )
+}
+```
+
+
+
 
 
 
