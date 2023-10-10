@@ -2436,8 +2436,44 @@ export function FileItem({ name, size, state }: FileItemProps) {
 E pronto, agora é só eu passar a propriedade de estado para o meu componente setando qual o estado dele.
 
 
+# Responsividade da sidebar
+
+Vou começar trabalhando na sidebar, para que ela não ocupe mais a largura toda da tela. Todas as estilizações que usei até o momento são usadas principalmente para mobile. 
+
+Na minha sidebar para deixar ela com um menu de abertura, quando tiver em mobile, eu vou usar a biblioteca `@radix-ui/react-collapsible`
 
 
+# Responsividade nas abas 
+
+Para lidar com a responsividade das abas eu vou usar `@radix-ui/react-scroll-area`, pois ele facilita lidar com estilização das abas para ser compatível em diversos navegadores.
+
+
+# Encurtando classes 
+Alguns elementos ficam com a classe de estilização do tailwind, muito grande, então para resolver esse problema eu vou instalar a biblioteca `tailwind-merge`:
+
+```bash
+npm i tailwind-merge
+```
+
+Depois de baixada, eu importo a funcionalidade e uso ela em algum elemento que eu queira encurtar as classes. Geralmente eu separo em linhas as classes responsáveis por cada estado do meu elemento, ou seja, em uma linha deixo classes que estilizam o elemento em si, e nas outras eu deixo classes que dependem de um `:hover, :active, etc...`.
+
+```js
+import { twMerge } from 'tailwind-merge'
+
+export function Button() {
+  return (
+    <button 
+      type="button" 
+      className={twMerge(
+        'flex items-center w-full gap-2 rounded-lg border-zinc-300',
+        'focus-within:border-violet-300 focus-within:ring-4 '
+        'hover:text-violet-200'
+        'dark:border-zinc-700 dark:bg-zinc-800'
+      )}>  
+    />
+  )
+}
+```
 
 
 
